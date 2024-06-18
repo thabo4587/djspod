@@ -1,27 +1,34 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { FavoriteContext } from './FavoriteContext';
 
-function ShowDetails() {
+const ShowDetails = ({ shows }) => {
   const { id } = useParams();
+  const { favorites, addFavorite, removeFavorite } = useContext(FavoriteContext);
   const [show, setShow] = useState(null);
   const [currentSeason, setCurrentSeason] = useState(null);
   const [loading, setLoading] = useState(true);
   const audioRefs = useRef({});
-  const [isFavorite, setIsFavorite] = useState(() => {
-    const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    return storedFavorites.includes(id);
-  });
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     const fetchShow = async () => {
       try {
-        const response = await fetch(`https://podcast-api.netlify.app/id/${id}`);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+        const selectedShow = shows.find(show => show.id === id);
+        if (selectedShow) {
+          setShow(selectedShow);
+          setIsFavorite(favorites.some(fav => fav.id === id));
+          setLoading(false);
+        } else {
+          const response = await fetch(`https://podcast-api.netlify.app/id/${id}`);
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const data = await response.json();
+          setShow(data);
+          setIsFavorite(favorites.some(fav => fav.id === id));
+          setLoading(false);
         }
-        const data = await response.json();
-        setShow(data);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
         setLoading(false);
@@ -29,19 +36,18 @@ function ShowDetails() {
     };
 
     fetchShow();
-  }, [id]);
+  }, [id, favorites, shows]);
 
   const handleSeasonSelect = (season) => {
     setCurrentSeason(season);
   };
 
   const toggleFavorite = () => {
-    const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    const updatedFavorites = isFavorite
-      ? storedFavorites.filter(favId => favId !== id)
-      : [...storedFavorites, id];
-
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+    if (isFavorite) {
+      removeFavorite(id);
+    } else {
+      addFavorite(show);
+    }
     setIsFavorite(!isFavorite);
   };
 
@@ -123,6 +129,6 @@ function ShowDetails() {
       )}
     </div>
   );
-}
+};
 
 export default ShowDetails;
