@@ -1,24 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './index.css';
+import ShowHome from './Home';
+import SignUp from './SignUp';
+import Favorites from './Favorites'; // Import your Favorites component
+import ShowDetails from './ShowDetails'; // Import your ShowDetails component
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<SignUp />} />
+        <Route path="/home" element={<ShowHome />} /> 
+        <Route path="/favorites" element={<Favorites />} />
+        <Route path="/show/:id" element={<ShowDetails />} /> 
+      </Routes>
+    </Router>
   );
 }
 
