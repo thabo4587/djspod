@@ -2,14 +2,41 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 function Favorites() {
+  const [favoriteIds, setFavoriteIds] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    setFavorites(storedFavorites);
-    setLoading(false);
-  }, []); // Empty dependency array ensures this runs only once on mount
+    setFavoriteIds(storedFavorites);
+  }, []);
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      setLoading(true);
+      try {
+        const favoritesData = await Promise.all(
+          favoriteIds.map(async (id) => {
+            const response = await fetch(`https://podcast-api.netlify.app/id/${id}`);
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+        );
+        setFavorites(favoritesData);
+      } catch (error) {
+        console.error('Error fetching favorite shows:', error);
+      }
+      setLoading(false);
+    };
+
+    if (favoriteIds.length > 0) {
+      fetchFavorites();
+    } else {
+      setLoading(false);
+    }
+  }, [favoriteIds]);
 
   if (loading) {
     return <div>Loading favorites...</div>;

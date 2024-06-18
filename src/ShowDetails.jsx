@@ -7,7 +7,6 @@ function ShowDetails() {
   const [currentSeason, setCurrentSeason] = useState(null);
   const [loading, setLoading] = useState(true);
   const audioRefs = useRef({});
-
   const [isFavorite, setIsFavorite] = useState(() => {
     const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
     return storedFavorites.includes(id);
